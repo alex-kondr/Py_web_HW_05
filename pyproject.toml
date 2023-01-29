@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pb-api"
+version = "0.1.0"
+description = ""
+authors = ["alex_kondr <alex_kondr@outlook.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "pb_api"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiohttp = "^3.8.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
