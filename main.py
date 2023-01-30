@@ -25,8 +25,6 @@ URL = "https://api.privatbank.ua/p24api/exchange_rates"
 
 async def get_exchange_rates(url: str, date: str):
     
-    
-    
     params = {
         "json": "",
         "coursid": date}
@@ -39,6 +37,9 @@ async def get_exchange_rates(url: str, date: str):
                 # print('Cookies: ', response.cookies)
                 # print(response.ok)
                 result = await response.json()
+                
+                print(f"{result=}")
+                
                 return result
 
 async def main():
@@ -51,8 +52,11 @@ async def main():
         date = date_now - delta
         date_str = date.strftime("%d.%m.%Y")
         
+        print(f"{date_str=}")
     
-        get_exchange_rates(URL, date_str)
+        result = await get_exchange_rates(URL, date_str)
+       
+    return result
     
 
     
