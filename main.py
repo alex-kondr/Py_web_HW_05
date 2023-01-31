@@ -33,12 +33,24 @@ async def get_exchange_rates(url: str, date: str):
                 exchanges = await response.json()
                 
                 # print(f"{date=}, time={time.time() - time_start}")
+                
+                
+    for exchange in exchanges["exchangeRate"]:
+        if exchange["currency"] == "EUR":
+            {date: 
+                {"EUR": 
+                    {"sale": exchange["saleRate"],
+                    "purchase": exchange["purchaseRate"]
+                    }
+                }
+            }
+        
     
-    return [exchange for exchange in exchanges["exchangeRate"]
-        if exchange["currency"] == "EUR" or exchange["currency"] == "USD"]
+    # return [exchange for exchange in exchanges["exchangeRate"]
+    #     if exchange["currency"] == "EUR" or exchange["currency"] == "USD"]
     
     
-async def main():
+async def run_futures():
     
     date_now = datetime.now()    
     futures = []
@@ -50,17 +62,27 @@ async def main():
         date_str = date.strftime("%d.%m.%Y")
         futures.append(get_exchange_rates(URL, date_str))
        
-    return await asyncio.gather(*futures)
+    return [results[0] for results in await asyncio.gather(*futures)]
+
+
+def main():
+    results = asyncio.run(run_futures())
+    print(results)
+    
+    # for result in results:
+    #     print(result)
 
 
 if __name__ == "__main__":
+    main()
+    
+    
     # time_now = time.time()
-    results = asyncio.run(main())
     
     # print(time.time() - time_now)
     
-    for result in results:
-        print(result)
+    # for result in results:
+    #     print(result)
         
     # print(time.time() - time_now)
         
