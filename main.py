@@ -2,7 +2,7 @@ import aiohttp
 import asyncio
 import argparse
 from datetime import datetime, timedelta
-import time
+# import time
 
 # time_start = time.time()
 
@@ -21,30 +21,37 @@ async def get_exchange_rates(url: str, date: str):
     
     params = {
         "json": "",
-        "date": date}
+        "id": date}
     
     async with aiohttp.ClientSession() as session:
             async with session.get(url, params=params) as response:
 
-                # print("Status:", response.status)
+                print("Status:", response.status)
                 # print("Content-type:", response.headers['content-type'])
                 # print('Cookies: ', response.cookies)
                 # print(response.ok)
+                if not response.ok:
+                    return response.ok
+                    # return "The site does not respond or the request is not valid"
+                    
                 exchanges = await response.json()
                 
-                # print(f"{date=}, time={time.time() - time_start}")
+                # print(f"{date=}, {exchanges=}")
                 
-                
+    result = {date: {}}
+    
     for exchange in exchanges["exchangeRate"]:
-        if exchange["currency"] == "EUR":
-            {date: 
-                {"EUR": 
-                    {"sale": exchange["saleRate"],
-                    "purchase": exchange["purchaseRate"]
+        if exchange["currency"] == "EUR" or exchange["currency"] == "USD":
+            result[date].update(
+                {
+                    exchange["currency"]: {                        
+                        "sale": exchange["saleRate"],
+                        "purchase": exchange["purchaseRate"]
                     }
                 }
-            }
-        
+            )
+            
+    return result
     
     # return [exchange for exchange in exchanges["exchangeRate"]
     #     if exchange["currency"] == "EUR" or exchange["currency"] == "USD"]
@@ -61,8 +68,13 @@ async def run_futures():
         date = date_now - delta
         date_str = date.strftime("%d.%m.%Y")
         futures.append(get_exchange_rates(URL, date_str))
+        
+        # if 
        
-    return [results[0] for results in await asyncio.gather(*futures)]
+    # return [results[0] for results in await asyncio.gather(*futures)]
+    return await asyncio.gather(*futures)
+    
+    # return result
 
 
 def main():
