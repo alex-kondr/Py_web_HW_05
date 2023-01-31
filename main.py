@@ -21,12 +21,12 @@ async def get_exchange_rates(url: str, date: str):
     
     params = {
         "json": "",
-        "id": date}
+        "date": date}
     
     async with aiohttp.ClientSession() as session:
             async with session.get(url, params=params) as response:
 
-                print("Status:", response.status)
+                # print("Status:", response.status)
                 # print("Content-type:", response.headers['content-type'])
                 # print('Cookies: ', response.cookies)
                 # print(response.ok)
@@ -79,14 +79,18 @@ async def run_futures():
 
 def main():
     results = asyncio.run(run_futures())
-    print(results)
+    
+    if not results[0]:
+        return "The site does not respond or the request is not valid"
+    
+    return results
     
     # for result in results:
     #     print(result)
 
 
 if __name__ == "__main__":
-    main()
+    print(main())
     
     
     # time_now = time.time()
