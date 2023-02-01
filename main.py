@@ -2,14 +2,14 @@ import aiohttp
 import asyncio
 import argparse
 from datetime import datetime, timedelta
-import platform
 
 
 parser = argparse.ArgumentParser(
     prog="ExchangeRate",
     description="Exchange rate for EUR to UAH and USD to UAH")
 
-parser.add_argument("n", metavar="amount_of_days", type=int, choices=range(1, 11))
+parser.add_argument("-d", "--days", metavar="Amount of days", type=int, choices=range(1, 11))
+parser.add_argument("-c", "--choice", metavar="Choice currency (Example: -c AUD)", type=str)
 args = parser.parse_args()
 
 
@@ -19,12 +19,16 @@ def parse_exchanges(exchanges):
     exchange_by_date = {date: {}}
 
     for exchange in exchanges["exchangeRate"]:
-        if exchange["currency"] == "EUR" or exchange["currency"] == "USD":
+        if (
+            exchange["currency"] == "EUR" or 
+            exchange["currency"] == "USD" or 
+            exchange["currency"] == args.choice
+        ):            
             exchange_by_date[date].update(
                 {
                     exchange["currency"]: {                        
-                        "sale": exchange["saleRate"],
-                        "purchase": exchange["purchaseRate"]
+                        "sale": exchange["saleRateNB"],
+                        "purchase": exchange["purchaseRateNB"]
                     }
                 }
             )
@@ -40,7 +44,7 @@ async def main():
     result = []
     
     async with aiohttp.ClientSession() as session:        
-        for i in range(args.n):
+        for i in range(args.days):
             
             date = date_now - timedelta(days=i)
             date_str = date.strftime("%d.%m.%Y")
