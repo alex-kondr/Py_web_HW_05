@@ -10,6 +10,7 @@ packages = [{include = "pb_api"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 aiohttp = "^3.8.3"
+websockets = "^10.4"
 
 
 [build-system]
