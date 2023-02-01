@@ -11,6 +11,7 @@ packages = [{include = "pb_api"}]
 python = "^3.10"
 aiohttp = "^3.8.3"
 websockets = "^10.4"
+names = "^0.3.0"
 
 
 [build-system]

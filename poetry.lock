@@ -351,6 +351,17 @@ files = [
 ]
 
 [[package]]
+name = "names"
+version = "0.3.0"
+description = "Generate random names"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "names-0.3.0.tar.gz", hash = "sha256:726e46254f2ed03f1ffb5d941dae3bc67c35123941c29becd02d48d0caa2a671"},
+]
+
+[[package]]
 name = "websockets"
 version = "10.4"
 description = "An implementation of the WebSocket Protocol (RFC 6455 & 7692)"
@@ -520,4 +531,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "164524669fd20def8824eb7df366dbec5a480e47319bc8b61bbdd9cf54a389c6"
+content-hash = "e6a7c3cf44d2805c7285ca3d844e6bcccdcadbee7ffe1b6ad165c788c3bcbb13"
