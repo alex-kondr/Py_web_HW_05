@@ -1,29 +1,81 @@
+import aiohttp
 import asyncio
-from time import time
-
-fake_users = [
-    {'id': 1, 'name': 'April Murphy', 'company': 'Bailey Inc', 'email': 'shawnlittle@example.org'},
-    {'id': 2, 'name': 'Emily Alexander', 'company': 'Martinez-Smith', 'email': 'turnerandrew@example.org'},
-    {'id': 3, 'name': 'Patrick Jones', 'company': 'Young, Pruitt and Miller', 'email': 'alancoleman@example.net'}
-]
+import argparse
+from datetime import datetime, timedelta
+import platform
 
 
-async def get_user_async(uid: int) -> dict:
-    await asyncio.sleep(0.5)
-    user, = list(filter(lambda user: user["id"] == uid, fake_users))
-    return user
+parser = argparse.ArgumentParser(
+    prog="ExchangeRate",
+    description="Exchange rate for EUR to UAH and USD to UAH")
+
+parser.add_argument("n", metavar="amount_of_days", type=int, choices=range(1, 11))
+args = parser.parse_args()
+
+URL = "https://api.privatbank.ua/p24api/exchange_rates"
 
 
-async def main():
-    r = []
-    for i in range(1, 4):
-        r.append(get_user_async(i))
-    return await asyncio.gather(*r)
+async def get_exchange_rates(session, date: str):
+    
+    params = {
+        "json": "",
+        "date": date}
+    
+    async with session.get(url, params=params) as response:
+        if not response.ok:
+            return response.ok
+            
+        exchanges = await response.json()
+                
+                # print(f"{date=}, {exchanges=}")
+                
+    result = {date: {}}
+    
+    for exchange in exchanges["exchangeRate"]:
+        if exchange["currency"] == "EUR" or exchange["currency"] == "USD":
+            result[date].update(
+                {
+                    exchange["currency"]: {                        
+                        "sale": exchange["saleRate"],
+                        "purchase": exchange["purchaseRate"]
+                    }
+                }
+            )
+            
+    return result
 
 
-if __name__ == '__main__':
-    start = time()
-    result = asyncio.run(main())
-    for r in result:
-        print(r)
-    print(time() - start)
+async def run_futures():
+    
+    date_now = datetime.now()    
+    futures = []
+    
+    async with aiohttp.ClientSession(URL) as session:
+    
+    for i in range(args.n):
+        
+        delta = timedelta(days=i)        
+        date = date_now - delta
+        date_str = date.strftime("%d.%m.%Y")
+        futures.append(get_exchange_rates(URL, date_str))
+        
+    return await asyncio.gather(*futures)
+    
+
+def main():
+    
+    results = asyncio.run(run_futures())
+    
+    if not results[0]:
+        return "The site does not respond or the request is not valid"
+    
+    return results
+
+
+if __name__ == "__main__":
+    
+    if platform.system() == 'Windows':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())    
+    
+    print(main())
+    
