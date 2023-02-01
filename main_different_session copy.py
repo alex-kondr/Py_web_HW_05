@@ -30,6 +30,25 @@ def get_urls(n: int) -> list[str]:
     return urls
 
 
+def parse_exchanges(exchanges):
+    
+    date = exchanges["date"]  
+    exchange_by_date = {date: {}}
+
+    for exchange in exchanges["exchangeRate"]:
+        if exchange["currency"] == "EUR" or exchange["currency"] == "USD":
+            exchange_by_date[date].update(
+                {
+                    exchange["currency"]: {                        
+                        "sale": exchange["saleRate"],
+                        "purchase": exchange["purchaseRate"]
+                    }
+                }
+            )
+            
+    return
+
+
 async def get_exchange_rates(urls: list[str]):
     
     result = []
@@ -40,32 +59,23 @@ async def get_exchange_rates(urls: list[str]):
             try:
                 async with session.get(url) as response:                
                     
-                    if response.status == 200:                        
+                    if response.status == 200:
+                        
                         exchanges = await response.json()
+                        exchange_by_date = get_exchange_rates(exchanges)
+                        result.append(exchange_by_date)
+                        
+                        return result                        
                         
                     else:
-                        return f"Error status: {response.status} for {url}"
+                        return(f"Error status: {response.status} for {url}")
                 
             except aiohttp.ClientConnectionError as error:
-                return {str(error)}
+                return(str(error))
             
-            date = exchanges["date"]  
-            exchange_by_date = {date: {}}
-    
-            for exchange in exchanges["exchangeRate"]:
-                if exchange["currency"] == "EUR" or exchange["currency"] == "USD":
-                    exchange_by_date[date].update(
-                        {
-                            exchange["currency"]: {                        
-                                "sale": exchange["saleRate"],
-                                "purchase": exchange["purchaseRate"]
-                            }
-                        }
-                    )
-                    
-            result.append(exchange_by_date)
+
             
-    return result
+    # return result
 
 
 def main():
