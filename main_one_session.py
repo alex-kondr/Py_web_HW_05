@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument("n", metavar="amount_of_days", type=int, choices=range(1, 11))
 args = parser.parse_args()
 
-URL = "https://api.privatbank.ua/p24api/exchange_rates"
+URL = "https://api1.privatbank.ua/p24api/exchange_rates"
 
 
 async def get_exchange_rates(session, url: str, date: str):
