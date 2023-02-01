@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import argparse
 from datetime import datetime, timedelta
+import platform
 # import time
 
 # time_start = time.time()
@@ -90,6 +91,10 @@ def main():
 
 
 if __name__ == "__main__":
+    if platform.system() == 'Windows':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    
+    
     print(main())
     
     
