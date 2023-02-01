@@ -12,23 +12,6 @@ parser = argparse.ArgumentParser(
 parser.add_argument("n", metavar="amount_of_days", type=int, choices=range(1, 11))
 args = parser.parse_args()
 
-URL = "https://api1.privatbank.ua/p24api/exchange_rates"
-
-
-def get_urls(n: int) -> list[str]:
-    
-    urls = []    
-    date_now = datetime.now() 
-    
-    for i in range(n):
-        
-        delta = timedelta(days=i)        
-        date = date_now - delta
-        date_str = date.strftime("%d.%m.%Y")
-        urls.append(f"{URL}?json&date={date_str}")
-    
-    return urls
-
 
 def parse_exchanges(exchanges):
     
@@ -46,50 +29,45 @@ def parse_exchanges(exchanges):
                 }
             )
             
-    return
+    return exchange_by_date
 
 
-async def get_exchange_rates(urls: list[str]):
+async def main():
+    
+    base_url = "https://api.privatbank.ua/p24api/exchange_rates"
+    date_now = datetime.now()
     
     result = []
     
     async with aiohttp.ClientSession() as session:        
-        for url in urls:
+        for i in range(args.n):
+            
+            date = date_now - timedelta(days=i)
+            date_str = date.strftime("%d.%m.%Y")
+            
+            params = {
+                "json": "",
+                "date": date_str
+            }
             
             try:
-                async with session.get(url) as response:                
+                async with session.get(base_url, params=params) as response:                
                     
                     if response.status == 200:
                         
                         exchanges = await response.json()
-                        exchange_by_date = get_exchange_rates(exchanges)
+                        exchange_by_date = parse_exchanges(exchanges)
                         result.append(exchange_by_date)
                         
-                        return result                        
-                        
                     else:
-                        return(f"Error status: {response.status} for {url}")
+                        print(f"Error status: {response.status} for '{base_url}' params={params}")
                 
             except aiohttp.ClientConnectionError as error:
-                return(str(error))
+                print(f"{str(error)}")
             
-
-            
-    # return result
-
-
-def main():
-    
-    urls = get_urls(args.n)
-    results = asyncio.run(get_exchange_rates(urls))
-    
-    return results
+    return result
 
 
 if __name__ == "__main__":
     
-    if platform.system() == 'Windows':
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    
-    
-    print(main())
+    print(asyncio.run(main()))
