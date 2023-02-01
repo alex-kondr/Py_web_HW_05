@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument("n", metavar="amount_of_days", type=int, choices=range(1, 11))
 args = parser.parse_args()
 
-URL = "https://api.privatbank.ua/p24api/exchange_rates"
+URL = "https://api1.privatbank.ua/p24api/exchange_rates"
 
 
 def get_urls(n: int) -> list[str]:
@@ -32,13 +32,13 @@ def get_urls(n: int) -> list[str]:
 
 async def get_exchange_rates(urls: list[str]):
     
-    result = {}
+    result = []
     
     async with aiohttp.ClientSession() as session:        
         for url in urls:
             
-            async with session.get(url) as response:                
-                try:
+            try:
+                async with session.get(url) as response:                
                     
                     if response.status == 200:                        
                         exchanges = await response.json()
@@ -46,14 +46,15 @@ async def get_exchange_rates(urls: list[str]):
                     else:
                         return f"Error status: {response.status} for {url}"
                 
-                except aiohttp.ClientConnectionError as error:
-                    return f"Connection error: {url}, {str(error)}"
-                
-            result.update({exchanges["date"]: {}})
+            except aiohttp.ClientConnectionError as error:
+                return {str(error)}
+            
+            date = exchanges["date"]  
+            exchange_by_date = {date: {}}
     
             for exchange in exchanges["exchangeRate"]:
                 if exchange["currency"] == "EUR" or exchange["currency"] == "USD":
-                    result[exchanges["date"]].update(
+                    exchange_by_date[date].update(
                         {
                             exchange["currency"]: {                        
                                 "sale": exchange["saleRate"],
@@ -61,6 +62,8 @@ async def get_exchange_rates(urls: list[str]):
                             }
                         }
                     )
+                    
+            result.append(exchange_by_date)
             
     return result
 
