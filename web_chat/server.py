@@ -56,7 +56,7 @@ class Server:
                 exchanges = await (exchange.main(int(n), currency))
                 message = await table_for_exchanges(exchanges)
                 
-            await self.send_to_clients(str(message))
+            await self.send_to_clients(str({"a": message}))
             
 
 async def table_for_exchanges(exchanges):
