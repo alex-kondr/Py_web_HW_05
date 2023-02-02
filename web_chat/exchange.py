@@ -13,7 +13,7 @@ parser.add_argument("-c", "--choice", metavar="Choice currency (Example: -c AUD)
 args = parser.parse_args()
 
 
-def parse_exchanges(exchanges):
+def parse_exchanges(exchanges, currency:str=None):
     
     date = exchanges["date"]  
     exchange_by_date = {date: {}}
@@ -22,7 +22,7 @@ def parse_exchanges(exchanges):
         if (
             exchange["currency"] == "EUR" or 
             exchange["currency"] == "USD" or 
-            exchange["currency"] == args.choice
+            exchange["currency"] == currency
         ):            
             exchange_by_date[date].update(
                 {
@@ -36,7 +36,7 @@ def parse_exchanges(exchanges):
     return exchange_by_date
 
 
-async def main():
+async def main(days=1, currency: str=None):
     
     base_url = "https://api.privatbank.ua/p24api/exchange_rates"
     date_now = datetime.now()
@@ -44,7 +44,7 @@ async def main():
     result = []
     
     async with aiohttp.ClientSession() as session:        
-        for i in range(args.days):
+        for i in range(days):
             
             date = date_now - timedelta(days=i)
             date_str = date.strftime("%d.%m.%Y")
@@ -60,7 +60,7 @@ async def main():
                     if response.status == 200:
                         
                         exchanges = await response.json()
-                        exchange_by_date = parse_exchanges(exchanges)
+                        exchange_by_date = parse_exchanges(exchanges, currency)
                         result.append(exchange_by_date)
                         
                     else:
@@ -74,4 +74,5 @@ async def main():
 
 if __name__ == "__main__":
     
-    print(asyncio.run(main()))
+    days = args.days if args.days else 1
+    print(asyncio.run(main(days, args.choice)))

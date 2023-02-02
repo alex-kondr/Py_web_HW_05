@@ -5,6 +5,9 @@ import websockets
 from websockets import WebSocketServerProtocol
 from websockets.exceptions import ConnectionClosedOK
 
+import exchange
+
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -24,8 +27,8 @@ class Server:
         if self.clients:
             [await client.send(messange) for client in self.clients]
         
-    async def ws_handler(self, ws: WebSocketServerProtocol):        
-        await self.register(ws)
+    async def ws_handler(self, ws: WebSocketServerProtocol):
+        await self.register(ws)        
         
         try:
             await self.distrubute(ws)            
@@ -34,10 +37,48 @@ class Server:
         finally:
             await self.unregister(ws)
             
-    async def distrubute(self, ws: WebSocketServerProtocol):        
+    async def distrubute(self, ws: WebSocketServerProtocol):
         async for message in ws:
-            await self.send_to_clients(f"{ws.name}: {message}")
             
+            n = 1
+            currency = None
+            
+            if len(message.split()) == 1:
+                command = message
+                
+            elif len(message.split()) == 2:
+                command, n = message.split()
+                
+            elif len(message.split()) == 3:
+                command, n, currency = message.split()                
+           
+            if command == "exchange":
+                exchanges = await (exchange.main(int(n), currency))
+                message = await table_for_exchanges(exchanges)
+                
+            await self.send_to_clients(str(message))
+            
+
+async def table_for_exchanges(exchanges):
+    
+    template = "\n<br>|{:^10}|{:^10}|{:^10}|{:^10}|"
+    headers = ["Date", "Currency", "Sale", "Purchase"]
+    header = template.format(*headers)
+    dividing_line = "\n<br>|" + "-" * 43 + "|"
+    
+    table = dividing_line + header + dividing_line
+    
+    for exchange in exchanges:
+        for date, values in exchange.items():
+            for currency, rates  in values.items():
+                    
+                table += template.format(date, currency, rates["sale"], rates["purchase"])
+                date = ""
+                    
+        table += dividing_line
+    
+    return table
+
 
 async def main():
     
@@ -48,6 +89,9 @@ async def main():
         
 
 if __name__ == "__main__":
+    
+    # a = asyncio.run(exchange.main())
+    # print(f"{a=}")
     
     try:
         asyncio.run(main())

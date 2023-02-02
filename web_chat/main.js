@@ -13,10 +13,15 @@ ws.onopen = (e) => {
 }
 
 ws.onmessage = (e) => {
-    console.log(e.data)
     text = e.data
+    console.log(text)
 
-    const elMsg = document.createElement("div")
-    elMsg.textContent = text
-    subscribe.appendChild(elMsg)
+    if ("1" == "1") {
+        text = text + "Hello"
+    }
+
+    // const elMsg = document.createElement("div")
+    // elMsg.textContent = text
+    // subscribe.appendChild(elMsg)
+    subscribe.textContent = text
 }
