@@ -3,7 +3,6 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import mimetypes
 from threading import Thread
 from pathlib import Path
-import logging 
 import urllib
 
 import server_websockets
@@ -54,8 +53,6 @@ def find_files(html_path):
             
         
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, format="%(message)s")
-    
     find_files(FILES_PATH)    
        
     http_server = Thread(target=run_http_server, daemon=True)

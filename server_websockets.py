@@ -1,5 +1,7 @@
 import asyncio
-import logging
+from aiofile import async_open
+from aiopath import AsyncPath
+from datetime import datetime
 import websockets
 from websockets import WebSocketServerProtocol
 from websockets.exceptions import ConnectionClosedOK
@@ -8,7 +10,7 @@ import json
 import exchange.exchange as exchange
 
 
-logging.basicConfig(level=logging.INFO)
+LOGGING = AsyncPath("logging.txt")
 
 
 class Server:
@@ -16,11 +18,11 @@ class Server:
     async def ws_handler(self, ws: WebSocketServerProtocol):
         
         try:
-            await self.distrubute(ws)            
+            await self.exchange_handler(ws)            
         except ConnectionClosedOK:
             pass
             
-    async def distrubute(self, ws: WebSocketServerProtocol):
+    async def exchange_handler(self, ws: WebSocketServerProtocol):
         
         async for message in ws:
             await ws.send(json.dumps(["Wait..."]))
@@ -38,6 +40,11 @@ class Server:
                 command, n, currency = message.split()                
            
             if command == "exchange":
+                async with async_open(LOGGING, "a") as afd:
+                    await afd.write(
+                        f"Exchange: {datetime.now()}, days: {n}, additional currency: {currency}\n"
+                    )
+                    
                 exchanges = await (exchange.main(int(n), currency))
                 message = await self.table_for_exchanges(exchanges)
                 
@@ -73,8 +80,6 @@ async def main():
     
     async with websockets.serve(server.ws_handler, "0.0.0.0", 8080):
         await asyncio.Future()
-        
-    # await 
         
 
 if __name__ == "__main__":
