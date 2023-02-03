@@ -13,15 +13,15 @@ ws.onopen = (e) => {
 }
 
 ws.onmessage = (e) => {
-    text = e.data
-    console.log(text)
+    jsonTable = JSON.parse(e.data)
+    console.log(jsonTable)
+    subscribe.textContent = ''
 
-    if ("1" == "1") {
-        text = text + "Hello"
-    }
+    jsonTable.forEach(function(item) {
 
-    // const elMsg = document.createElement("div")
-    // elMsg.textContent = text
-    // subscribe.appendChild(elMsg)
-    subscribe.textContent = text
+        const elMsg = document.createElement("div")
+        elMsg.textContent = item
+        subscribe.appendChild(elMsg)
+
+    })
 }
