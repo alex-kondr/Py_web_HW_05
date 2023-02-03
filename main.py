@@ -58,10 +58,10 @@ if __name__ == "__main__":
     
     find_files(FILES_PATH)    
        
-    http_server = Thread(target=run_http_server)#, daemon=True)
+    http_server = Thread(target=run_http_server, daemon=True)
     http_server.start()
     
     try:
         asyncio.run(server_websockets.main())
     except KeyboardInterrupt:
-        http_server.terminate()
+        pass
